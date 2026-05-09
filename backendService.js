@@ -29,7 +29,7 @@ async function testDeepL(selectedLanguage) {
     const response = await fetch("https://api-free.deepl.com/v2/translate", {
         method: "POST",
         headers: {
-            "Authorization": "DeepL-Auth-Key 306a351c-5e97-4478-aea9-ee268364fcda:fx",
+            "Authorization": "DeepL-Auth-Key _____________________________________________",
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
