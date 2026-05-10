@@ -1,237 +1,142 @@
 # Lingo - Language Translator
 
-Lingo is a lightweight Chrome extension that opens a translator inside Chrome's side panel. It uses plain HTML, CSS, and JavaScript to collect text from the user, load available target languages from DeepL, and send translation requests to the DeepL Free API.
+Lingo is a lightweight Chrome extension that opens a translator inside Chrome's side panel. It lets a user type or paste text, choose a target language, and translate the text through the DeepL Free API.
 
-## What It Uses
+This README is the quick project guide: what the app does, what technology it uses, how to run it, and how someone could build a similar version themselves. For a detailed explanation of what every project file does, read [FILE_DOCUMENTATION.md](FILE_DOCUMENTATION.md).
 
-### Core Technologies
+## What The App Does
 
-- **Chrome Extension Manifest V3** for extension setup, permissions, icons, background service worker, and side panel registration.
-- **Chrome Side Panel API** so clicking the extension icon opens `panel.html` in Chrome's side panel.
-- **Vanilla JavaScript** for DOM access, button events, API calls, and response handling.
-- **HTML5** for the extension panel structure.
-- **CSS3** for the responsive panel layout, form styling, gradients, focus states, and card UI.
-- **Browser Fetch API** for calling DeepL endpoints from the extension.
+Lingo adds a translator panel to Chrome. When the extension icon is clicked, Chrome opens the side panel and shows a simple translation form.
 
-### Tools Needed
+The user flow is:
 
-- **Google Chrome** to load and run the extension.
-- **Chrome Extensions page** at `chrome://extensions` to load the folder as an unpacked extension.
-- **Chrome DevTools** for checking console messages, API errors, and network requests while debugging.
-- **DeepL API account/key** for language loading and translation.
-- **A code editor** such as VS Code for changing the HTML, CSS, JavaScript, and manifest files.
+1. Open the extension from Chrome's toolbar.
+2. Type or paste text into the input box.
+3. Select a target language from the dropdown.
+4. Click `Translate`.
+5. Read the translated result in the output box.
 
-### APIs
+Behind the scenes, the app loads target languages from DeepL, sends the user's text to DeepL, and displays the returned translation.
 
-The extension currently uses the **DeepL Free API**:
+## Tech Used
 
-- `GET https://api-free.deepl.com/v2/languages?type=target`
-  - Used by `languageSelector.js`.
-  - Loads the list of languages DeepL can translate into.
-  - Each response item is converted into an `<option>` inside the target language dropdown.
+- **Chrome Extension Manifest V3** for the extension configuration.
+- **Chrome Side Panel API** to open the app inside Chrome's side panel.
+- **HTML5** for the panel structure.
+- **CSS3** for layout, colors, spacing, form styling, and responsive behavior.
+- **Vanilla JavaScript** for DOM selection, events, API calls, and UI updates.
+- **Browser Fetch API** for HTTP requests to DeepL.
+- **DeepL Free API** for language lists and translations.
 
-- `POST https://api-free.deepl.com/v2/translate`
-  - Used by `backendService.js`.
-  - Sends the user's text and selected target language to DeepL.
-  - Reads `data.translations[0].text` from the response and places it in the output textarea.
+## Tools Used
 
-There is also older commented-out code in `backendService.js` for **LibreTranslate**, using a local endpoint:
+- **Google Chrome** to run the extension.
+- **Chrome Extensions page** at `chrome://extensions` to load the project as an unpacked extension.
+- **Chrome DevTools** to inspect console logs, network requests, and API errors.
+- **A code editor** such as VS Code to edit the files.
+- **A DeepL API key** to call DeepL's API.
 
-- `POST http://127.0.0.1:5000/translate`
+## APIs Used
 
-That LibreTranslate code is not active right now, but it shows an alternate direction if you want to run translation through a local or self-hosted service.
+The project currently uses the **DeepL Free API**.
 
-### Packages
-
-This project does **not** use npm packages, bundlers, frameworks, or build tools.
-
-There is no `package.json`, no `node_modules`, and no install step. Chrome loads the files directly as an unpacked extension.
-
-### Permissions
-
-The extension requests:
-
-- `sidePanel`
-  - Allows the extension to use Chrome's side panel feature.
-
-The extension also declares this host permission:
-
-- `https://api-free.deepl.com/*`
-  - Allows the extension to make requests to the DeepL Free API.
-
-## File-by-File Overview
-
-### `.gitattributes`
-
-Configures Git to automatically detect text files and normalize line endings:
+### Load Target Languages
 
 ```text
-* text=auto
+GET https://api-free.deepl.com/v2/languages?type=target
 ```
 
-This helps keep line endings consistent across Windows, macOS, and Linux.
+This request loads the list of languages DeepL can translate into. The app turns that response into dropdown options.
 
-### `manifest.json`
+### Translate Text
 
-Defines the Chrome extension.
-
-Important parts:
-
-- `manifest_version: 3` tells Chrome this is a Manifest V3 extension.
-- `name`, `version`, and `description` define the extension metadata.
-- `permissions: ["sidePanel"]` enables side panel support.
-- `host_permissions` allows requests to DeepL.
-- `icons` points to `logo(white).png` for extension icons.
-- `background.service_worker` registers `sidePanelServiceWorker.js`.
-- `side_panel.default_path` tells Chrome to render `panel.html` in the side panel.
-- `action.default_title` and `action.default_icon` configure the toolbar extension button.
-
-### `panel.html`
-
-Builds the side panel UI.
-
-It contains:
-
-- A title: `Translate Cleanly`
-- A short intro line.
-- A textarea for the original text.
-- A dropdown for the target language.
-- A `Translate` button.
-- A readonly textarea for the translated result.
-
-At the bottom, it loads:
-
-```html
-<script src="languageSelector.js"></script>
-<script src="backendService.js"></script>
+```text
+POST https://api-free.deepl.com/v2/translate
 ```
 
-The order matters because `backendService.js` uses `targetLanguage`, which is created in `languageSelector.js`.
-
-### `styles.css`
-
-Controls the entire visual design of the side panel.
-
-It includes:
-
-- CSS variables for colors, shadows, borders, and focus rings.
-- A responsive page background.
-- The main panel layout.
-- Header typography.
-- Card styling.
-- Form field spacing.
-- Textarea, select, and button styling.
-- Focus states for accessibility.
-- A hover effect for the translate button.
-
-The CSS is pure CSS and does not depend on Bootstrap, Tailwind, or any UI library.
-
-### `languageSelector.js`
-
-Loads DeepL target languages into the dropdown.
-
-Main flow:
-
-1. Finds the language dropdown with:
-
-   ```js
-   const targetLanguage = document.getElementById("targetLanguage")
-   ```
-
-2. Calls DeepL:
-
-   ```js
-   fetch("https://api-free.deepl.com/v2/languages?type=target", ...)
-   ```
-
-3. Converts each returned language into an `<option>`.
-
-4. Special-cases DeepL's `ZH` language code so it appears as:
-
-   ```text
-   Chinese (generic)
-   ```
-
-5. Appends every option to the dropdown.
-
-6. Calls `loadLanguages()` immediately when the script loads.
-
-### `backendService.js`
-
-Handles the actual translation button behavior.
-
-Main pieces:
-
-- Reads the input textarea, output textarea, and translate button from the DOM.
-- Contains commented-out LibreTranslate code from an earlier or alternate implementation.
-- Defines `testDeepL(selectedLanguage)`, which sends the translation request to DeepL.
-- Sends this JSON body:
-
-  ```json
-  {
-    "text": ["user text here"],
-    "target_lang": "selected language code"
-  }
-  ```
-
-- Handles specific DeepL error statuses:
-  - `456`: API usage limit reached.
-  - `429`: too many requests.
-  - `500`: DeepL internal server error.
-  - Other failed or unexpected responses: generic translation failure.
-
-- Adds a click listener to the translate button.
-- Shows `Translating...` while waiting for the API response.
-- Places the translated text into the readonly output textarea.
-- Logs the input, language, and translation to the console.
-
-Important security note: the current implementation calls DeepL directly from browser-side JavaScript. That means the DeepL API key is visible to anyone who opens the extension files or DevTools. This is okay for a local learning project, but a production version should move DeepL requests behind a small backend server so the API key stays private.
-
-### `sidePanelServiceWorker.js`
-
-Configures how the side panel opens.
-
-It calls:
+This request sends the user's text and selected target language to DeepL. The app reads the translated result from:
 
 ```js
-chrome.sidePanel.setPanelBehavior({
-    openPanelOnActionClick: true
-})
+data.translations[0].text
 ```
 
-That makes the extension open the side panel when the user clicks the extension icon in Chrome's toolbar.
+There is also commented-out code for **LibreTranslate** in `backendService.js`. That older code points at:
 
-If Chrome throws an error, the service worker logs it to the console.
+```text
+POST http://127.0.0.1:5000/translate
+```
 
-### `logo(white).png`
+It is not active right now, but it shows how the project could be adapted to a local or self-hosted translation service.
 
-The extension icon image.
+## Packages
 
-Current image details:
+This project does **not** use npm packages.
 
-- PNG file.
-- Used for `16`, `32`, `48`, and `128` icon sizes in `manifest.json`.
-- Also used as the toolbar action icon.
-- Source image size: `1254 x 1254`.
+There is no:
 
-Chrome can scale it down for the listed icon sizes, though a polished extension may eventually use separate optimized icon files for each size.
+- `package.json`
+- `node_modules`
+- React
+- Vite
+- Express
+- Bootstrap
+- Tailwind
+- build command
+
+Chrome loads the files directly as an unpacked extension.
+
+## Permissions
+
+The extension requests this Chrome permission:
+
+```json
+["sidePanel"]
+```
+
+That allows the extension to use Chrome's side panel feature.
+
+The extension also requests this host permission:
+
+```json
+["https://api-free.deepl.com/*"]
+```
+
+That allows browser requests to DeepL's Free API.
+
+## Project Files
+
+```text
+Lingo-Seamless_Language_Translator/
+  .gitattributes
+  backendService.js
+  languageSelector.js
+  logo(white).png
+  manifest.json
+  panel.html
+  sidePanelServiceWorker.js
+  styles.css
+  README.md
+  FILE_DOCUMENTATION.md
+```
+
+For a detailed explanation of each file, see [FILE_DOCUMENTATION.md](FILE_DOCUMENTATION.md).
 
 ## How The App Works
 
 1. Chrome reads `manifest.json`.
-2. Chrome registers `sidePanelServiceWorker.js` as the background service worker.
+2. Chrome registers `sidePanelServiceWorker.js` as the extension's background service worker.
 3. The service worker tells Chrome to open the side panel when the extension icon is clicked.
-4. Chrome loads `panel.html` into the side panel.
+4. Chrome loads `panel.html` inside the side panel.
 5. `panel.html` loads `styles.css`, `languageSelector.js`, and `backendService.js`.
-6. `languageSelector.js` calls DeepL's languages endpoint and fills the dropdown.
-7. The user types text, chooses a target language, and clicks `Translate`.
-8. `backendService.js` sends the text to DeepL's translate endpoint.
-9. DeepL returns translated text.
-10. The extension displays the translation in the output textarea.
+6. `languageSelector.js` calls DeepL's language endpoint and fills the dropdown.
+7. The user enters text and clicks `Translate`.
+8. `backendService.js` calls DeepL's translate endpoint.
+9. DeepL returns the translated text.
+10. The app displays the translation in the readonly output textarea.
 
 ## How To Run It Locally
 
-1. Open Chrome.
+1. Open Google Chrome.
 2. Go to:
 
    ```text
@@ -252,9 +157,9 @@ Chrome can scale it down for the listed icon sizes, though a polished extension 
 
 ## How To Implement It Yourself
 
-### 1. Create the project files
+### 1. Create The Extension Folder
 
-Create a folder with these files:
+Create a folder for the extension and add these files:
 
 ```text
 manifest.json
@@ -266,24 +171,16 @@ sidePanelServiceWorker.js
 logo.png
 ```
 
-### 2. Add a Manifest V3 config
+### 2. Configure The Extension
 
-Your `manifest.json` needs:
-
-- `manifest_version: 3`
-- `permissions: ["sidePanel"]`
-- `host_permissions` for the API you call.
-- A background service worker.
-- A `side_panel.default_path`.
-- Extension action metadata.
-
-Example structure:
+Create a `manifest.json` file with Manifest V3 settings:
 
 ```json
 {
   "manifest_version": 3,
   "name": "My Translator",
   "version": "1.0",
+  "description": "A simple side panel translator",
   "permissions": ["sidePanel"],
   "host_permissions": ["https://api-free.deepl.com/*"],
   "background": {
@@ -298,20 +195,25 @@ Example structure:
 }
 ```
 
-### 3. Create the side panel UI
+### 3. Build The Panel UI
 
 In `panel.html`, create:
 
-- One textarea for source text.
-- One select dropdown for target language.
-- One button to start translation.
-- One readonly textarea for the translated result.
+- A textarea for the text the user wants to translate.
+- A select dropdown for the target language.
+- A button that starts the translation.
+- A readonly textarea for the translated result.
 
-Then load your JavaScript files at the bottom of the body.
+Load your scripts at the bottom of the body:
 
-### 4. Enable the side panel behavior
+```html
+<script src="languageSelector.js"></script>
+<script src="backendService.js"></script>
+```
 
-In `sidePanelServiceWorker.js`, call Chrome's Side Panel API:
+### 4. Open The Side Panel From The Toolbar Icon
+
+In `sidePanelServiceWorker.js`, use Chrome's Side Panel API:
 
 ```js
 chrome.sidePanel.setPanelBehavior({
@@ -319,9 +221,9 @@ chrome.sidePanel.setPanelBehavior({
 })
 ```
 
-### 5. Load target languages
+### 5. Load Languages From DeepL
 
-Use DeepL's languages endpoint:
+In `languageSelector.js`, call DeepL's target languages endpoint:
 
 ```js
 const response = await fetch("https://api-free.deepl.com/v2/languages?type=target", {
@@ -332,11 +234,11 @@ const response = await fetch("https://api-free.deepl.com/v2/languages?type=targe
 })
 ```
 
-Then loop through the JSON response and add each language to the dropdown.
+Then loop through the JSON response and add each language to the dropdown as an `<option>`.
 
-### 6. Translate user text
+### 6. Send Translation Requests
 
-Use DeepL's translate endpoint:
+In `backendService.js`, call DeepL's translate endpoint when the user clicks the translate button:
 
 ```js
 const response = await fetch("https://api-free.deepl.com/v2/translate", {
@@ -352,44 +254,45 @@ const response = await fetch("https://api-free.deepl.com/v2/translate", {
 })
 ```
 
-Then read:
+Read the translated text from the response:
 
 ```js
 const data = await response.json()
 translationInput.value = data.translations[0].text
 ```
 
-### 7. Add error handling
+### 7. Handle Errors
 
-At minimum, handle:
+Useful error handling includes:
 
 - Empty input.
-- Missing selected language.
-- API usage limits.
-- Rate limits.
+- Missing target language.
+- DeepL usage limit errors.
+- Rate limit errors.
 - Network failures.
 - Unexpected API responses.
 
-### 8. Protect the API key for production
+### 8. Protect The API Key For Production
 
-For a public or production release, do not keep the DeepL key in frontend JavaScript.
+The current project calls DeepL directly from browser-side JavaScript. That means the API key is visible to anyone who opens the extension files or DevTools.
 
-A safer setup is:
+For a public version, a safer design is:
 
-1. Chrome extension sends text to your own backend endpoint.
-2. Backend reads the DeepL key from an environment variable.
-3. Backend calls DeepL.
-4. Backend returns only the translated text to the extension.
+1. The Chrome extension sends text to your own backend.
+2. The backend reads the DeepL key from an environment variable.
+3. The backend calls DeepL.
+4. The backend sends only the translated text back to the extension.
 
-That way users can use the translator without seeing or copying the API key.
+This keeps the API key private.
 
 ## Improvement Ideas
 
 - Move the DeepL key to a backend server.
-- Add an empty-input validation message before calling the API.
+- Add validation before sending empty text.
 - Disable the translate button while a request is loading.
-- Add a copy-to-clipboard button for the translated text.
-- Add source language selection or auto-detect display.
+- Add a copy-to-clipboard button.
+- Add source language selection.
+- Show DeepL's detected source language.
 - Save the user's last selected target language with `chrome.storage`.
-- Replace the single large icon file with optimized `16`, `32`, `48`, and `128` pixel icons.
+- Use separate optimized icon files for `16`, `32`, `48`, and `128` pixel sizes.
 - Show visible error messages instead of only logging some failures to the console.
