@@ -2,6 +2,8 @@
 
 Lingo is a lightweight Chrome extension that opens a translator inside Chrome's side panel. It lets a user type or paste text, choose a target language, and translate the text through the DeepL Free API.
 
+Link to the extension: https://chromewebstore.google.com/detail/lingo-language-translator/okfkakjgiocfbejhmlpfmlbgjgdkddbl
+
 This README is the quick project guide: what the app does, what technology it uses, how to run it, and how someone could build a similar version themselves. For a detailed explanation of what every project file does, read [FILE_DOCUMENTATION.md](FILE_DOCUMENTATION.md).
 
 ## What The App Does
