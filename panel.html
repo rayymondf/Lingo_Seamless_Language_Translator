@@ -16,9 +16,12 @@
                 </div>
             </header>
 
-            <section class="card">
+            <section class="card translator">
                 <label class="field" for="textInput">
-                    <span class="field__label">Text to translate</span>
+                    <span class="field__row">
+                        <span class="field__label">Text to translate</span>
+                        <span id="characterCount" class="field__hint">0 characters</span>
+                    </span>
                     <textarea id="textInput" rows="5" placeholder="Type or paste your text here"></textarea>
                 </label>
 
@@ -27,12 +30,29 @@
                     <select id="targetLanguage" aria-label="Choose a target language"></select>
                 </label>
 
-                <button id="translateBtn" type="button">Translate</button>
+                <div class="actions">
+                    <button id="translateBtn" class="button button--primary" type="button">Translate</button>
+                    <button id="copyBtn" class="button button--secondary" type="button" disabled>Copy</button>
+                </div>
 
                 <label class="field" for="translationInput">
                     <span class="field__label">Translation</span>
                     <textarea id="translationInput" rows="5" placeholder="Your translation will appear here" readonly></textarea>
                 </label>
+
+                <p id="statusMessage" class="status" role="status" aria-live="polite"></p>
+            </section>
+
+            <section class="card history" aria-labelledby="historyTitle">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="historyTitle" class="section-heading__title">Recent translations</h2>
+                        <p class="section-heading__intro">Saved on this browser only</p>
+                    </div>
+                    <button id="clearHistoryBtn" class="button button--ghost" type="button">Clear</button>
+                </div>
+                <div id="historyList" class="history__list"></div>
+                <p id="emptyHistory" class="history__empty">Your recent translations will appear here.</p>
             </section>
         </main>
 

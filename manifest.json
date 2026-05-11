@@ -3,7 +3,7 @@
   "name": "Lingo - Language Translator",
   "version": "1.0",
   "description": "Seamless Language Translator using DeepL API",
-  "permissions": ["sidePanel"],
+  "permissions": ["sidePanel", "storage"],
   "host_permissions": [
     "https://api-free.deepl.com/*"
   ],
