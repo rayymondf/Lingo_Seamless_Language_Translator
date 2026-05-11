@@ -47,6 +47,12 @@ Important fields:
 
 Without this file, Chrome would not know how to install or run the extension.
 
+If the extension is changed to use a local LibreTranslate server, this file would also need a local host permission such as:
+
+```json
+["http://127.0.0.1:5000/*"]
+```
+
 ## `panel.html`
 
 This file defines the visible side panel interface.
@@ -130,6 +136,8 @@ Important functions:
 - `populateLanguages(languages)`: Rebuilds the dropdown options.
 - `loadLanguages()`: Fetches languages from DeepL, falls back if needed, and restores saved selection.
 
+If the project switches fully to LibreTranslate, this file may also need to change. DeepL and LibreTranslate do not use exactly the same language-list endpoint or language-code format, so the dropdown options should match whichever translation service is active.
+
 ## `backendService.js`
 
 This file handles the main app behavior after the panel loads.
@@ -174,6 +182,35 @@ Storage keys used:
 - `lingoDraftText`: Saved source text draft.
 - `lingoTranslationHistory`: Saved recent translations.
 - `lingoLastTargetLanguage`: Saved target language.
+
+### Optional LibreTranslate Version
+
+An earlier version of this project had commented-out LibreTranslate code in this file. That commented code was removed during cleanup, but LibreTranslate is still a possible local/self-hosted alternative to DeepL.
+
+With a local LibreTranslate server, the translation request would usually go to:
+
+```text
+POST http://127.0.0.1:5000/translate
+```
+
+The request body usually uses this shape:
+
+```json
+{
+  "q": "Text to translate",
+  "source": "en",
+  "target": "fr",
+  "format": "text"
+}
+```
+
+The translated result usually comes back as:
+
+```js
+data.translatedText
+```
+
+To switch from DeepL to LibreTranslate, the `translateWithDeepL()` function would either be replaced or paired with a new function such as `translateWithLibreTranslate()`. The click handler, history saving, copy button, and UI status messages could stay mostly the same because they only need a final translated string.
 
 ## `sidePanelServiceWorker.js`
 

@@ -34,6 +34,7 @@ Recent history, draft text, and the last selected language are stored locally th
 - **Vanilla JavaScript** for UI behavior, browser storage, and API requests.
 - **Fetch API** for HTTP requests.
 - **DeepL Free API** for language lists and translation.
+- **LibreTranslate** as an optional local/self-hosted translation alternative.
 
 ## Packages
 
@@ -73,6 +74,41 @@ This request sends the user's text and selected target language to DeepL. The tr
 data.translations[0].text
 ```
 
+### Optional Local LibreTranslate
+
+The extension can also be adapted to use a locally hosted translation server instead of DeepL. The earlier version of this project had commented LibreTranslate code in `backendService.js`; that code was removed during cleanup, but the idea is still valid.
+
+LibreTranslate can run on your own machine, commonly at:
+
+```text
+http://127.0.0.1:5000/translate
+```
+
+With LibreTranslate, the request body usually looks like:
+
+```json
+{
+  "q": "Text to translate",
+  "source": "en",
+  "target": "fr",
+  "format": "text"
+}
+```
+
+The response usually returns the translated result as:
+
+```js
+data.translatedText
+```
+
+Using LibreTranslate locally can be helpful because:
+
+- You can test without using DeepL quota.
+- You can avoid exposing a DeepL API key in frontend code.
+- You can experiment with a self-hosted translation service.
+
+To fully switch this extension to LibreTranslate, `backendService.js` would need to call the local LibreTranslate endpoint instead of DeepL, and `manifest.json` would need permission for the local host URL.
+
 ## Permissions
 
 The extension requests:
@@ -91,6 +127,12 @@ The extension also requests this host permission:
 ```
 
 That allows the extension to call DeepL's Free API.
+
+If you switch to local LibreTranslate, you would also need a host permission like:
+
+```json
+["http://127.0.0.1:5000/*"]
+```
 
 ## Project Files
 
@@ -159,7 +201,7 @@ After code changes, go back to `chrome://extensions` and click the reload button
 
 The current project calls DeepL directly from browser-side JavaScript. That means the API key is visible to anyone who opens the extension files or DevTools.
 
-For a production version, a safer design is:
+For a production version, a safer DeepL design is:
 
 1. The Chrome extension sends text to your own backend.
 2. The backend reads the DeepL key from an environment variable.
@@ -168,9 +210,12 @@ For a production version, a safer design is:
 
 This keeps the API key private and gives you more control over rate limits, abuse prevention, and logging.
 
+A local LibreTranslate setup is another option for development or private use. In that setup, your extension sends translation requests to a local server running on your computer instead of sending them directly to DeepL.
+
 ## Improvement Ideas
 
 - Move the DeepL API key to a backend service before a public production release.
+- Add a setting to choose between DeepL and a local LibreTranslate server.
 - Add source language selection or show DeepL's detected source language.
 - Add a button to swap source and target languages if source language support is added.
 - Add a "favorite" option for important translations.
