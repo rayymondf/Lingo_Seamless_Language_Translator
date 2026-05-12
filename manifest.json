@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lingo - Language Translator",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Seamless Language Translator using DeepL API",
   "permissions": ["sidePanel", "storage"],
   "host_permissions": [
