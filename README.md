@@ -197,28 +197,3 @@ After code changes, go back to `chrome://extensions` and click the reload button
 7. Click a recent translation to reload it later.
 8. Use `Clear` to remove saved recent translations.
 
-## Production Security Note
-
-The current project calls DeepL directly from browser-side JavaScript. That means the API key is visible to anyone who opens the extension files or DevTools.
-
-For a production version, a safer DeepL design is:
-
-1. The Chrome extension sends text to your own backend.
-2. The backend reads the DeepL key from an environment variable.
-3. The backend calls DeepL.
-4. The backend sends only the translated text back to the extension.
-
-This keeps the API key private and gives you more control over rate limits, abuse prevention, and logging.
-
-A local LibreTranslate setup is another option for development or private use. In that setup, your extension sends translation requests to a local server running on your computer instead of sending them directly to DeepL.
-
-## Improvement Ideas
-
-- Move the DeepL API key to a backend service before a public production release.
-- Add a setting to choose between DeepL and a local LibreTranslate server.
-- Add source language selection or show DeepL's detected source language.
-- Add a button to swap source and target languages if source language support is added.
-- Add a "favorite" option for important translations.
-- Add delete buttons for individual history items.
-- Add keyboard shortcuts, such as `Ctrl + Enter` to translate.
-- Create separate optimized icon files for `16`, `32`, `48`, and `128` pixel sizes.
