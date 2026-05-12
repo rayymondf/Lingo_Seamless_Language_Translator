@@ -1,6 +1,6 @@
 const targetLanguageSelect = document.getElementById("targetLanguage")
 const LAST_TARGET_LANGUAGE_KEY = "lingoLastTargetLanguage"
-const DEEPL_AUTH_KEY = "306a351c-5e97-4478-aea9-ee268364fcda:fx"
+const DEEPL_AUTH_KEY = "-------------------------------------------"
 
 window.lingoDeepLAuthKey = DEEPL_AUTH_KEY
 
